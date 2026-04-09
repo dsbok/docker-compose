@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  owncloud:
+    image: owncloud/server:10.16.1
+    container_name: owncloud
+    restart: unless-stopped
+    ports:
+      - "8989:8080"
+    environment:
+      - OWNCLOUD_ADMIN_USERNAME=admin
+      - OWNCLOUD_ADMIN_PASSWORD=admin123
+      - OWNCLOUD_DB_TYPE=sqlite
+      - OWNCLOUD_TRUSTED_DOMAINS=160.30.5.117,160.30.5.117:8989
+    volumes:
+      - /root/files/owncloud:/mnt/data
