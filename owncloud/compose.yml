@@ -1,0 +1,11 @@
+services:
+  owncloud:
+    image: owncloud/server:10.16.1
+    container_name: owncloud
+    restart: unless-stopped
+    ports:
+      - 8989:8080
+    volumes:
+      - /opt/stacks/owncloud:/mnt/data
+networks:
+  owncloud: {}
