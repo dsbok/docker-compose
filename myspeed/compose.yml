@@ -1,7 +1,7 @@
 services:
   myspeed:
     image: germannewsmaker/myspeed
-    container_name: MySpeed
+    container_name: myspeed
     restart: unless-stopped
     ports:
       - 5216:5216
