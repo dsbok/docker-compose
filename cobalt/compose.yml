@@ -1,0 +1,11 @@
+services:
+  cobalt:
+    image: ghcr.io/imputnet/cobalt:11
+    container_name: cobalt
+    init: true
+    read_only: true
+    restart: unless-stopped
+    ports:
+      - 9000:9000/tcp
+    env_file:
+      - .env
