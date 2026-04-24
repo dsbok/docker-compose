@@ -7,5 +7,3 @@ services:
       - 8989:8080
     volumes:
       - /opt/stacks/owncloud:/mnt/data
-networks:
-  owncloud: {}
