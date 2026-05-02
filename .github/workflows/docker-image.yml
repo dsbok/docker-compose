@@ -1,0 +1,96 @@
+name: ci-basic
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      # --- Checkout ---
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # --- YAML Lint ---
+      - name: Lint YAML files
+        uses: ibiqlik/action-yamllint@v3
+
+      # --- Docker Compose Validation ---
+      - name: Validate docker-compose files
+        run: |
+          set -e
+
+          # Detect common compose filenames
+          files=""
+          for f in docker-compose.yml docker-compose.yaml compose.yml compose.yaml; do
+            if [ -f "$f" ]; then
+              files="$files -f $f"
+            fi
+          done
+
+          if [ -z "$files" ]; then
+            echo "No docker compose file found. Skipping."
+            exit 0
+          fi
+
+          echo "Validating compose files: $files"
+          docker compose $files config > /dev/null
+
+      # --- .env Consistency Check ---
+      - name: Check .env.example consistency
+        run: |
+          set -e
+
+          if [ ! -f ".env.example" ]; then
+            echo ".env.example not found. Skipping."
+            exit 0
+          fi
+
+          if [ ! -f ".env" ]; then
+            echo ".env not present (expected in CI). Skipping strict check."
+            exit 0
+          fi
+
+          missing_vars=""
+
+          for var in $(grep -o '^[A-Za-z_][A-Za-z0-9_]*' .env.example); do
+            if ! grep -q "^$var=" .env; then
+              missing_vars="$missing_vars $var"
+            fi
+          done
+
+          if [ -n "$missing_vars" ]; then
+            echo "Missing variables in .env:"
+            echo "$missing_vars"
+            exit 1
+          fi
+
+          echo "Environment variables are consistent."
+
+      # --- Optional Dry Run ---
+      - name: Test container startup (optional)
+        run: |
+          set -e
+
+          files=""
+          for f in docker-compose.yml docker-compose.yaml compose.yml compose.yaml; do
+            if [ -f "$f" ]; then
+              files="$files -f $f"
+            fi
+          done
+
+          if [ -z "$files" ]; then
+            echo "No docker compose file found. Skipping."
+            exit 0
+          fi
+
+          echo "Starting containers (dry run)..."
+          docker compose $files up -d || {
+            echo "Container startup failed"
+            exit 1
+          }
+
+          echo "Stopping containers..."
+          docker compose $files down
