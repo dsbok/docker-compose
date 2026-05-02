@@ -10,22 +10,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           persist-credentials: true
 
+      # Setup Python
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
 
+      # Install tools
       - name: Install YAML tools
         run: pip install --no-cache-dir yamllint ruamel.yaml
 
+      # Auto format YAML (ignore .github)
       - name: Auto format YAML
         run: |
           set -e
+
           cat << 'EOF' > format_yaml.py
           import os
           from ruamel.yaml import YAML
@@ -34,29 +39,42 @@ jobs:
           yaml.explicit_start = True
           yaml.indent(mapping=2, sequence=4, offset=2)
 
-          for root, _, files in os.walk("."):
+          IGNORE_DIRS = {".github", ".git", "__pycache__"}
+
+          for root, dirs, files in os.walk("."):
+              dirs[:] = [d for d in dirs if d not in IGNORE_DIRS]
+
               for name in files:
                   if name.endswith((".yml", ".yaml")):
                       path = os.path.join(root, name)
+
                       try:
                           with open(path, "r") as f:
                               data = yaml.load(f)
+
                           if data is None:
                               continue
+
                           with open(path, "w") as f:
                               yaml.dump(data, f)
+
                           print(f"Formatted: {path}")
+
                       except Exception as e:
                           print(f"Skipped {path}: {e}")
           EOF
+
           python format_yaml.py
 
+      # YAML lint
       - name: Lint YAML
         run: yamllint .
 
+      # Validate docker compose
       - name: Validate docker-compose
         run: |
           set -e
+
           files=""
           for f in docker-compose.yml docker-compose.yaml compose.yml compose.yaml; do
             if [ -f "$f" ]; then
@@ -65,18 +83,21 @@ jobs:
           done
 
           if [ -z "$files" ]; then
-            echo "No compose file found. Skipping."
+            echo "No docker compose file found. Skipping."
             exit 0
           fi
 
           docker compose $files config > /dev/null
 
+      # Commit formatting fixes
       - name: Commit fixes
         run: |
           set -e
+
           if [ -n "$(git status --porcelain)" ]; then
             git config user.name "github-actions"
             git config user.email "actions@github.com"
+
             git add .
             git commit -m "chore: auto format yaml"
             git push
