@@ -9,6 +9,9 @@ jobs:
   format-and-validate:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      
     steps:
       # Checkout repository
       - name: Checkout repository
