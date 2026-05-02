@@ -1,0 +1,21 @@
+version: 2
+updates:
+  # 1. Automatically find and update all Docker Compose files
+  - package-ecosystem: "docker"
+    directory: "/"
+    # Setting directory to "/" with a weekly schedule allows Dependabot 
+    # to scan your sub-folders for docker-compose.yml files.
+    schedule:
+      interval: "weekly"
+    
+    # Groups updates so you don't get individual PRs for every folder
+    groups:
+      docker-images:
+        patterns:
+          - "*" 
+
+  # 2. Keep GitHub Actions themselves updated
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
