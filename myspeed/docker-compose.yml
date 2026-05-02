@@ -1,3 +1,4 @@
+---
 services:
   myspeed:
     image: germannewsmaker/myspeed

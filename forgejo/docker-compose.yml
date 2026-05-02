@@ -1,3 +1,4 @@
+---
 services:
   forgejo:
     image: codeberg.org/forgejo/forgejo:14
