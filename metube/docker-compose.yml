@@ -1,10 +1,22 @@
----
+name: metube
 services:
   metube:
-    image: ghcr.io/alexta69/metube
     container_name: metube
-    restart: unless-stopped
+    image: ghcr.io/alexta69/metube
+    networks:
+      default: null
     ports:
-      - 8081:8081
+      - mode: ingress
+        target: 8081
+        published: "8081"
+        protocol: tcp
+    restart: unless-stopped
     volumes:
-      - /opt/stacks/metube:/downloads
+      - type: bind
+        source: /opt/stacks/metube
+        target: /downloads
+        bind:
+          create_host_path: true
+networks:
+  default:
+    name: metube_default
