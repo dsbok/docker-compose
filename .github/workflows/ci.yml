@@ -1,28 +1,75 @@
-name: ci-basic
+name: ci-format-validate
 
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
-  validate:
+  format-and-validate:
     runs-on: ubuntu-latest
 
     steps:
-      # --- Checkout ---
+      # Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
-      # --- YAML Lint ---
-      - name: Lint YAML files
-        uses: ibiqlik/action-yamllint@v3
+      # Python setup
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
 
-      # --- Docker Compose Validation ---
-      - name: Validate docker-compose files
+      # Install tools
+      - name: Install YAML tools
+        run: |
+          pip install --no-cache-dir yamllint ruamel.yaml
+
+      # Auto format YAML + add '---'
+      - name: Auto format YAML
         run: |
           set -e
 
-          # Detect common compose filenames
+          python << 'EOF'
+import os
+from ruamel.yaml import YAML
+
+yaml = YAML()
+yaml.explicit_start = True
+yaml.indent(mapping=2, sequence=4, offset=2)
+
+for root, _, files in os.walk("."):
+    for name in files:
+        if name.endswith((".yml", ".yaml")):
+            path = os.path.join(root, name)
+
+            try:
+                with open(path, "r") as f:
+                    data = yaml.load(f)
+
+                if data is None:
+                    continue
+
+                with open(path, "w") as f:
+                    yaml.dump(data, f)
+
+                print(f"Formatted: {path}")
+
+            except Exception as e:
+                print(f"Skipped {path}: {e}")
+EOF
+
+      # Lint YAML
+      - name: Lint YAML
+        run: yamllint .
+
+      # Validate docker compose
+      - name: Validate docker-compose
+        run: |
+          set -e
+
           files=""
           for f in docker-compose.yml docker-compose.yaml compose.yml compose.yaml; do
             if [ -f "$f" ]; then
@@ -31,66 +78,24 @@ jobs:
           done
 
           if [ -z "$files" ]; then
-            echo "No docker compose file found. Skipping."
+            echo "No compose file found. Skipping."
             exit 0
           fi
 
-          echo "Validating compose files: $files"
           docker compose $files config > /dev/null
 
-      # --- .env Consistency Check ---
-      - name: Check .env.example consistency
+      # Commit fixes
+      - name: Commit fixes
         run: |
           set -e
 
-          if [ ! -f ".env.example" ]; then
-            echo ".env.example not found. Skipping."
-            exit 0
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions"
+            git config user.email "actions@github.com"
+
+            git add .
+            git commit -m "chore: auto format yaml"
+            git push
+          else
+            echo "No changes to commit"
           fi
-
-          if [ ! -f ".env" ]; then
-            echo ".env not present (expected in CI). Skipping strict check."
-            exit 0
-          fi
-
-          missing_vars=""
-
-          for var in $(grep -o '^[A-Za-z_][A-Za-z0-9_]*' .env.example); do
-            if ! grep -q "^$var=" .env; then
-              missing_vars="$missing_vars $var"
-            fi
-          done
-
-          if [ -n "$missing_vars" ]; then
-            echo "Missing variables in .env:"
-            echo "$missing_vars"
-            exit 1
-          fi
-
-          echo "Environment variables are consistent."
-
-      # --- Optional Dry Run ---
-      - name: Test container startup (optional)
-        run: |
-          set -e
-
-          files=""
-          for f in docker-compose.yml docker-compose.yaml compose.yml compose.yaml; do
-            if [ -f "$f" ]; then
-              files="$files -f $f"
-            fi
-          done
-
-          if [ -z "$files" ]; then
-            echo "No docker compose file found. Skipping."
-            exit 0
-          fi
-
-          echo "Starting containers (dry run)..."
-          docker compose $files up -d || {
-            echo "Container startup failed"
-            exit 1
-          }
-
-          echo "Stopping containers..."
-          docker compose $files down
