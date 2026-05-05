@@ -1,13 +1,25 @@
-version: '3.8'
-
+name: nginx
 services:
   nginx:
-    image: nginx:stable-alpine
     container_name: nginx
-    restart: always
-    ports:
-      - "80:80"
     environment:
-      - TZ=Asia/Kuala_Lumpur
+      TZ: Asia/Kuala_Lumpur
+    image: nginx:stable-alpine
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 80
+        published: "80"
+        protocol: tcp
+    restart: always
     volumes:
-      - /opt/stacks/nginx:/usr/share/nginx/html:ro
+      - type: bind
+        source: /opt/stacks/nginx
+        target: /usr/share/nginx/html
+        read_only: true
+        bind:
+          create_host_path: true
+networks:
+  default:
+    name: nginx_default
