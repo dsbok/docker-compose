@@ -1,14 +1,24 @@
-version: '3.8'
-
+name: nginx
 services:
   web:
-    image: trafex/php-nginx:latest
     container_name: nginx-php
-    restart: always
-    ports:
-      - "80:80"
     environment:
-      - TZ=Asia/Kuala_Lumpur
+      TZ: Asia/Kuala_Lumpur
+    image: trafex/php-nginx:latest
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 80
+        published: "80"
+        protocol: tcp
+    restart: always
     volumes:
-      # Map your code to the image's default web root
-      - /opt/stacks/nginx:/var/www/html
+      - type: bind
+        source: /opt/stacks/nginx
+        target: /var/www/html
+        bind:
+          create_host_path: true
+networks:
+  default:
+    name: nginx_default
