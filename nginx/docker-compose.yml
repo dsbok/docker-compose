@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx-server
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      - TZ=Asia/Kuala_Lumpur
+    volumes:
+      # Map the base directory for all configurations and content
+      - /opt/stacks/nginx/html:/usr/share/nginx/html:ro
+      - /opt/stacks/nginx/conf.d:/etc/nginx/conf.d:ro
+      - /opt/stacks/nginx/logs:/var/log/nginx
+      # Sync host timezone with container
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
