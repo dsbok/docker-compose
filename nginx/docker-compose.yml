@@ -1,48 +1,13 @@
-name: nginx
+version: '3.8'
+
 services:
   nginx:
-    container_name: nginx-server
-    environment:
-      TZ: Asia/Kuala_Lumpur
     image: nginx:stable-alpine
-    networks:
-      default: null
+    container_name: nginx
+    restart: always
     ports:
-      - mode: ingress
-        target: 80
-        published: "80"
-        protocol: tcp
-    restart: unless-stopped
+      - "80:80"
+    environment:
+      - TZ=Asia/Kuala_Lumpur
     volumes:
-      - type: bind
-        source: /opt/stacks/nginx/html
-        target: /usr/share/nginx/html
-        read_only: true
-        bind:
-          create_host_path: true
-      - type: bind
-        source: /opt/stacks/nginx/conf.d
-        target: /etc/nginx/conf.d
-        read_only: true
-        bind:
-          create_host_path: true
-      - type: bind
-        source: /opt/stacks/nginx/logs
-        target: /var/log/nginx
-        bind:
-          create_host_path: true
-      - type: bind
-        source: /etc/localtime
-        target: /etc/localtime
-        read_only: true
-        bind:
-          create_host_path: true
-      - type: bind
-        source: /etc/timezone
-        target: /etc/timezone
-        read_only: true
-        bind:
-          create_host_path: true
-networks:
-  default:
-    name: nginx_default
+      - /opt/stacks/nginx:/usr/share/nginx/html:ro
