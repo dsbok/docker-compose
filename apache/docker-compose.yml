@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  web:
+    image: php:8.3-apache
+    container_name: apache-php
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      - TZ=Asia/Kuala_Lumpur
+    volumes:
+      # Map your code to Apache's default web root
+      - /opt/stacks/apache:/var/www/html
