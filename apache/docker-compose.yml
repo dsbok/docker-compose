@@ -1,14 +1,24 @@
-version: '3.8'
-
+name: apache
 services:
   web:
-    image: php:8.3-apache
     container_name: apache-php
-    restart: always
-    ports:
-      - "80:80"
     environment:
-      - TZ=Asia/Kuala_Lumpur
+      TZ: Asia/Kuala_Lumpur
+    image: php:8.3-apache
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 80
+        published: "80"
+        protocol: tcp
+    restart: always
     volumes:
-      # Map your code to Apache's default web root
-      - /opt/stacks/apache:/var/www/html
+      - type: bind
+        source: /opt/stacks/apache
+        target: /var/www/html
+        bind:
+          create_host_path: true
+networks:
+  default:
+    name: apache_default
