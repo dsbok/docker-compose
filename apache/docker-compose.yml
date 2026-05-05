@@ -1,7 +1,7 @@
 name: apache
 services:
   web:
-    container_name: apache-php
+    container_name: apache
     environment:
       TZ: Asia/Kuala_Lumpur
     image: php:8.3-apache
