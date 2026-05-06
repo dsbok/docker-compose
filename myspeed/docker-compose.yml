@@ -1,22 +1,9 @@
-name: myspeed
 services:
   myspeed:
-    container_name: myspeed
     image: germannewsmaker/myspeed
-    networks:
-      default: null
-    ports:
-      - mode: ingress
-        target: 5216
-        published: "5216"
-        protocol: tcp
+    container_name: myspeed
     restart: unless-stopped
+    ports:
+      - "5216:5216"
     volumes:
-      - type: bind
-        source: /opt/stacks/myspeed
-        target: /myspeed/data
-        bind:
-          create_host_path: true
-networks:
-  default:
-    name: myspeed_default
+      - /opt/stacks/myspeed:/myspeed/data
