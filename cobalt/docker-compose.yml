@@ -1,20 +1,11 @@
-name: cobalt
 services:
   cobalt:
-    container_name: cobalt
-    environment:
-      API_URL: http://160.30.5.117:9000
     image: ghcr.io/imputnet/cobalt:11
-    init: true
-    networks:
-      default: null
-    ports:
-      - mode: ingress
-        target: 9000
-        published: "9000"
-        protocol: tcp
-    read_only: true
+    container_name: cobalt
     restart: unless-stopped
-networks:
-  default:
-    name: cobalt_default
+    init: true
+    read_only: true
+    environment:
+      - API_URL=http://160.30.5.117:9000
+    ports:
+      - "9000:9000"
