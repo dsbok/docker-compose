@@ -1,33 +1,13 @@
-name: dockge
 services:
   dockge:
-    environment:
-      DOCKGE_STACKS_DIR: /opt/stacks
     image: louislam/dockge:1
-    networks:
-      default: null
-    ports:
-      - mode: ingress
-        target: 5001
-        published: "5001"
-        protocol: tcp
+    container_name: dockge
     restart: unless-stopped
+    environment:
+      - DOCKGE_STACKS_DIR=/opt/stacks
+    ports:
+      - "5001:5001"
     volumes:
-      - type: bind
-        source: /var/run/docker.sock
-        target: /var/run/docker.sock
-        bind:
-          create_host_path: true
-      - type: bind
-        source: /home/runner/work/docker-compose/docker-compose/dockge/data
-        target: /app/data
-        bind:
-          create_host_path: true
-      - type: bind
-        source: /opt/stacks
-        target: /opt/stacks
-        bind:
-          create_host_path: true
-networks:
-  default:
-    name: dockge_default
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/runner/work/docker-compose/docker-compose/dockge/data:/app/data
+      - /opt/stacks:/opt/stacks
