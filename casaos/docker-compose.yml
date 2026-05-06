@@ -1,28 +1,11 @@
-name: casaos
 services:
   casa:
-    container_name: casa
     image: dockurr/casa
-    networks:
-      default: null
+    container_name: casa
+    restart: unless-stopped
+    stop_grace_period: 1m
     ports:
-      - mode: ingress
-        target: 8080
-        published: "8083"
-        protocol: tcp
-    restart: always
-    stop_grace_period: 1m0s
+      - "8083:8080"
     volumes:
-      - type: bind
-        source: /opt/stacks/casaos
-        target: /DATA
-        bind:
-          create_host_path: true
-      - type: bind
-        source: /var/run/docker.sock
-        target: /var/run/docker.sock
-        bind:
-          create_host_path: true
-networks:
-  default:
-    name: casaos_default
+      - /opt/stacks/casaos:/DATA
+      - /var/run/docker.sock:/var/run/docker.sock
