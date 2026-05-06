@@ -1,24 +1,11 @@
-name: nginx
 services:
   web:
-    container_name: nginx-php
-    environment:
-      TZ: Asia/Kuala_Lumpur
     image: trafex/php-nginx:latest
-    networks:
-      default: null
+    container_name: nginx-php
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Kuala_Lumpur
     ports:
-      - mode: ingress
-        target: 80
-        published: "80"
-        protocol: tcp
-    restart: always
+      - "80:80"
     volumes:
-      - type: bind
-        source: /opt/stacks/nginx
-        target: /var/www/html
-        bind:
-          create_host_path: true
-networks:
-  default:
-    name: nginx_default
+      - /opt/stacks/nginx:/var/www/html
