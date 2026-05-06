@@ -1,24 +1,11 @@
-name: apache
 services:
   web:
-    container_name: apache
-    environment:
-      TZ: Asia/Kuala_Lumpur
     image: php:8.3-apache
-    networks:
-      default: null
+    container_name: apache
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Kuala_Lumpur
     ports:
-      - mode: ingress
-        target: 80
-        published: "80"
-        protocol: tcp
-    restart: always
+      - "80:80"
     volumes:
-      - type: bind
-        source: /opt/stacks/apache
-        target: /var/www/html
-        bind:
-          create_host_path: true
-networks:
-  default:
-    name: apache_default
+      - /opt/stacks/apache:/var/www/html
