@@ -1,27 +1,14 @@
-name: owncloud
 services:
   owncloud:
-    container_name: owncloud
-    environment:
-      OWNCLOUD_ADMIN_PASSWORD: admin123
-      OWNCLOUD_ADMIN_USERNAME: admin
-      OWNCLOUD_DB_TYPE: sqlite
-      OWNCLOUD_TRUSTED_DOMAINS: 160.30.5.117,160.30.5.117:8989
     image: owncloud/server:10.16.1
-    networks:
-      default: null
-    ports:
-      - mode: ingress
-        target: 8080
-        published: "8989"
-        protocol: tcp
+    container_name: owncloud
     restart: unless-stopped
+    environment:
+      - OWNCLOUD_ADMIN_USERNAME=admin
+      - OWNCLOUD_ADMIN_PASSWORD=admin123
+      - OWNCLOUD_DB_TYPE=sqlite
+      - OWNCLOUD_TRUSTED_DOMAINS=160.30.5.117,160.30.5.117:8989
+    ports:
+      - "8989:8080"
     volumes:
-      - type: bind
-        source: /opt/stacks/owncloud
-        target: /mnt/data
-        bind:
-          create_host_path: true
-networks:
-  default:
-    name: owncloud_default
+      - /opt/stacks/owncloud:/mnt/data
