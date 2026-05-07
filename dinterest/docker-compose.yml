@@ -1,0 +1,7 @@
+services:
+  dinterest:
+    image: ghcr.io/dsbok/dinterest:latest
+    container_name: dinterest
+    restart: unless-stopped
+    ports:
+      - "5003:5003"
