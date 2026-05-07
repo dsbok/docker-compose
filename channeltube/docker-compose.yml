@@ -1,0 +1,12 @@
+services:
+  channeltube:
+    image: thewicklowwolf/channeltube:latest
+    container_name: channeltube
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - /opt/stacks/channeltube/config:/channeltube/config
+      - /opt/stacks/channeltube/downloads:/channeltube/downloads
+      - /opt/stacks/channeltube/audio:/channeltube/audio_downloads
+      - /etc/localtime:/etc/localtime:ro
